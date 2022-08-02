@@ -1,13 +1,14 @@
 const express = require("express"),
   Session = require("express-session"),
   bodyParse = require("body-parser"),
-  mongoose = require("mongoose"),
-  middleware = require("connect-ensure-login"),
-  FileStore = require("session-file-store")(session),
-  config = require("./config/default"),
-  flash = require("connect-flash"),
-  port = 3333,
-  app = express();
+  passport = require("./auth/passport");
+(mongoose = require("mongoose")),
+  (middleware = require("connect-ensure-login")),
+  (FileStore = require("session-file-store")(session)),
+  (config = require("./config/default")),
+  (flash = require("connect-flash")),
+  (port = 3333),
+  (app = express());
 
 mongoose.connect("mongodb://127.0.0.1/nodestream", { useNewUrlParser: true });
 
@@ -28,6 +29,12 @@ app.use(
     maxAge: Date().now + 60 * 1000 * 30,
   })
 );
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use("/login", require("./routes/login"));
+app.use("/register", require("./routes/register"));
 
 app.get("*", middleware.ensureLoggedIn(), (req, res) => {
   res.render("index");
